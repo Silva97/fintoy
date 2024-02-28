@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Clients\AuthorizingServiceClient;
 use App\Models\User;
 use App\Rules\MaxUserBalanceValue;
 use Illuminate\Foundation\Http\FormRequest;
@@ -18,7 +19,13 @@ class TransactionCreateRequest extends FormRequest
      */
     public function authorize()
     {
-        return !$this->user()->is_shopkeeper;
+        if ($this->user()->is_shopkeeper) {
+            return false;
+        }
+
+        $authorizingService = app()->make(AuthorizingServiceClient::class);
+
+        return $authorizingService->hasAuthorization($this->user());
     }
 
     /**

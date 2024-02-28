@@ -7,6 +7,7 @@ use App\Http\Requests\UserLoginRequest;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
@@ -33,6 +34,11 @@ class UserController extends Controller
         });
 
         return response()->json($userData, JsonResponse::HTTP_CREATED);
+    }
+
+    public function getSelf(Request $request): JsonResponse
+    {
+        return response()->json(auth()->user());
     }
 
     public function login(UserLoginRequest $request): JsonResponse

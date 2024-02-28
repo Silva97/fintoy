@@ -38,7 +38,16 @@ class UserController extends Controller
 
     public function getSelf(Request $request): JsonResponse
     {
-        return response()->json(auth()->user());
+        $user = $request->user();
+
+        return response()->json([
+            'id' => $user->id,
+            'email' => $user->email,
+            'name' => $user->name,
+            'identification_number' => $user->identification_number,
+            'is_shopkeeper' => $user->is_shopkeeper,
+            'balance' => $user->wallet->balance,
+        ]);
     }
 
     public function login(UserLoginRequest $request): JsonResponse

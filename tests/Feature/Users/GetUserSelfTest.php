@@ -11,11 +11,9 @@ class GetUserSelfTest extends TestCase
     {
         /** @var User */
         $user = User::factory()->create();
-        $token = auth()->login($user);
+        $this->actingAs($user);
 
-        $this->get('/users/self', [
-            'Authorization' => "Bearer $token",
-        ])
+        $this->get('/users/self')
             ->assertOk()
             ->assertExactJson([
                 'id' => $user->id,
@@ -23,6 +21,7 @@ class GetUserSelfTest extends TestCase
                 'email' => $user->email,
                 'is_shopkeeper' => $user->is_shopkeeper,
                 'identification_number' => $user->identification_number,
+                'balance' => 9001,
             ]);
     }
 

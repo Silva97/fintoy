@@ -28,15 +28,15 @@ class UserFactory extends Factory
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Indicate that the user should be a shopkeeper
      *
      * @return \Illuminate\Database\Eloquent\Factories\Factory
      */
-    public function unverified()
+    public function shopkeeper()
     {
         return $this->state(function (array $attributes) {
             return [
-                'email_verified_at' => null,
+                'is_shopkeeper' => true,
             ];
         });
     }

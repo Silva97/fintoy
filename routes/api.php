@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,10 @@ Route::prefix('users')->group(function () {
  * Authenticated routes.
  */
 Route::middleware('auth:api')->group(function () {
+    Route::prefix('transactions')->group(function () {
+        Route::post('/', [TransactionController::class, 'create']);
+    });
+
     Route::prefix('users')->group(function () {
         Route::get('/self', [UserController::class, 'getSelf']);
     });

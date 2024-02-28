@@ -15,11 +15,13 @@ class UserLoginRequest extends FormRequest
     {
         return [
             'email' => [
+                'required',
                 'string',
                 'email',
                 'max:320',
             ],
             'password' => [
+                'required',
                 'string',
                 'max:72',
             ],

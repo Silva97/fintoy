@@ -25,4 +25,10 @@ class GetUserSelfTest extends TestCase
                 'identification_number' => $user->identification_number,
             ]);
     }
+
+    public function test_try_to_get_user_self_data_unauthenticated_expects_401()
+    {
+        $this->get('/users/self')
+            ->assertUnauthorized();
+    }
 }

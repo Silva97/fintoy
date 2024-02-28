@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserCreateRequest;
+use App\Http\Requests\UserLoginRequest;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Http\JsonResponse;
@@ -25,12 +26,30 @@ class UserController extends Controller
             $user->is_shopkeeper = $validatedData['is_shopkeeper'];
             $user->identification_number = $validatedData['identification_number'];
             $user->wallet_id = $wallet->id;
-            $user->password = password_hash($validatedData['password'], PASSWORD_BCRYPT);
+            $user->setPassword($validatedData['password']);
             $user->save();
 
             return $user->toArray();
         });
 
         return response()->json($userData, JsonResponse::HTTP_CREATED);
+    }
+
+    public function login(UserLoginRequest $request): JsonResponse
+    {
+        $validatedData = $request->validated();
+        $user = User::where('email', $validatedData['email'])->first();
+
+        if (!$user || !$user->checkPassword($validatedData['password'])) {
+            return response()->json([], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
+        $token = auth()->login($user);
+
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => config('jwt.ttl') * 60,
+        ]);
     }
 }

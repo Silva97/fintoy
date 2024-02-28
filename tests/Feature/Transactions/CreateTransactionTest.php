@@ -2,11 +2,33 @@
 
 namespace Tests\Feature\Transactions;
 
+use App\Clients\AuthorizingServiceClient;
 use App\Models\User;
+use Mockery;
+use Mockery\MockInterface;
 use Tests\TestCase;
 
 class CreateTransactionTest extends TestCase
 {
+    /**
+     * Setup the test environment.
+     *
+     * @return void
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $mockedAuthorizingServiceInstance = Mockery::mock(
+            AuthorizingServiceClient::class,
+            function (MockInterface $mock) {
+                $mock->shouldReceive('hasAuthorization')
+                    ->andReturn(true);
+            }
+        );
+
+        $this->instance(AuthorizingServiceClient::class, $mockedAuthorizingServiceInstance);
+    }
     public function test_make_transaction_between_common_users()
     {
         /** @var User */

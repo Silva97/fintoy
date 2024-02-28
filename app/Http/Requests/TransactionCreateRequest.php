@@ -50,7 +50,7 @@ class TransactionCreateRequest extends FormRequest
                 // So to avoid integer overflow on PHP context we should
                 // ensure to not pass the PHP limit.
                 'max:' . min(self::UINT32_MAX, PHP_INT_MAX),
-                new MaxUserBalanceValue(),
+                new MaxUserBalanceValue($this->user()->wallet->balance),
             ],
         ];
     }

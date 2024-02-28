@@ -2,18 +2,21 @@
 
 namespace App\Rules;
 
+use App\Models\User;
 use Illuminate\Contracts\Validation\Rule;
 
 class MaxUserBalanceValue implements Rule
 {
+    protected int $currentBalance;
+
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(int $currentBalance)
     {
-        //
+        $this->currentBalance = $currentBalance;
     }
 
     /**
@@ -25,16 +28,8 @@ class MaxUserBalanceValue implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (!is_int($value)) {
-            return false;
-        }
-
-        $userWallet = optional(auth()->user())->wallet;
-        if (!$userWallet) {
-            return false;
-        }
-
-        return $value <= $userWallet->balance;
+        return is_int($value)
+            && $value <= $this->currentBalance;
     }
 
     /**

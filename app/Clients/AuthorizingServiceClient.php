@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Http;
 
 class AuthorizingServiceClient
 {
-    private string $url = "https://run.mocky.io/v3/5794d450-d2e2-4412-8131-73d0293ac1cc";
+    private string $url = 'https://run.mocky.io/v3/5794d450-d2e2-4412-8131-73d0293ac1cc';
 
     public function __construct(string $url = null)
     {
@@ -16,6 +16,11 @@ class AuthorizingServiceClient
         }
     }
 
+    /**
+     * Check if user is authorized to do a transaction.
+     *
+     * @return bool  True if user has authorization.
+     */
     public function hasAuthorization(User $payer): bool
     {
         $response = Http::post($this->url, [
@@ -23,10 +28,7 @@ class AuthorizingServiceClient
             'identification_number' => $payer->identification_number,
         ]);
 
-        if ($response->status() != 200) {
-            return false;
-        }
-
-        return $response->json('message') === 'Autorizado';
+        return $response->status() == 200
+            && $response->json('message') === 'Autorizado';
     }
 }

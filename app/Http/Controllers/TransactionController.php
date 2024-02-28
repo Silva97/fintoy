@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TransactionCreateRequest;
+use App\Jobs\NotifyTransactionJob;
 use App\Models\Transaction;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +36,8 @@ class TransactionController extends Controller
         } catch (\Throwable $e) {
             return response('', Response::HTTP_FORBIDDEN);
         }
+
+        NotifyTransactionJob::dispatch($payee, $validatedData['value']);
 
         return response()->noContent();
     }

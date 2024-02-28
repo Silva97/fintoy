@@ -3,7 +3,9 @@
 namespace Tests\Feature\Transactions;
 
 use App\Clients\AuthorizingServiceClient;
+use App\Jobs\NotifyTransactionJob;
 use App\Models\User;
+use Illuminate\Support\Facades\Bus;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\TestCase;
@@ -19,6 +21,8 @@ class CreateTransactionTest extends TestCase
     {
         parent::setUp();
 
+        Bus::fake();
+
         $mockedAuthorizingServiceInstance = Mockery::mock(
             AuthorizingServiceClient::class,
             function (MockInterface $mock) {
@@ -29,6 +33,7 @@ class CreateTransactionTest extends TestCase
 
         $this->instance(AuthorizingServiceClient::class, $mockedAuthorizingServiceInstance);
     }
+
     public function test_make_transaction_between_common_users()
     {
         /** @var User */
@@ -48,6 +53,8 @@ class CreateTransactionTest extends TestCase
 
         $this->assertEquals(8901, $payer->wallet->balance);
         $this->assertEquals(9101, $payee->wallet->balance);
+
+        Bus::assertDispatched(NotifyTransactionJob::class);
     }
 
     public function test_make_transaction_from_common_user_to_shopkeeper()
@@ -69,6 +76,8 @@ class CreateTransactionTest extends TestCase
 
         $this->assertEquals(8901, $payer->wallet->balance);
         $this->assertEquals(9101, $payee->wallet->balance);
+
+        Bus::assertDispatched(NotifyTransactionJob::class);
     }
 
     public function test_try_to_make_transaction_as_shopkeeper_expects_403()
@@ -90,6 +99,8 @@ class CreateTransactionTest extends TestCase
 
         $this->assertEquals(9001, $payer->wallet->balance);
         $this->assertEquals(9001, $payee->wallet->balance);
+
+        Bus::assertNotDispatched(NotifyTransactionJob::class);
     }
 
     public function test_try_to_make_transaction_with_insufficient_balance_expects_422()
@@ -115,5 +126,7 @@ class CreateTransactionTest extends TestCase
 
         $this->assertEquals(9001, $payer->wallet->balance);
         $this->assertEquals(9001, $payee->wallet->balance);
+
+        Bus::assertNotDispatched(NotifyTransactionJob::class);
     }
 }

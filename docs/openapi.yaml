@@ -1,0 +1,243 @@
+openapi: 3.1.0
+info:
+  title: Fintoy
+  version: 1.0.0
+tags:
+  - name: User
+    description: User account operations
+  - name: Transaction
+    description: Transaction operations
+paths:
+  /users:
+    post:
+      description: Create new user account.
+      tags:
+        - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - identification_number
+                - is_shopkeeper
+                - password
+              properties:
+                name:
+                  type: string
+                  description: User full name
+                  minLength: 5
+                  maxLength: 255
+                  examples:
+                    - John Smith
+                email:
+                  type: string
+                  description: User email
+                  maxLength: 320
+                  examples:
+                    - user@example.com
+                identification_number:
+                  type: string
+                  description: User's CPF if `is_shopkeeper` is `false`, otherwise it should be the a CNPJ
+                  examples:
+                    - "39008244012"
+                is_shopkeeper:
+                  type: boolean
+                  description: If `true`, create user as shopkeeper. Otherwise create a common user
+                  examples:
+                    - false
+                password:
+                  type: string
+                  description: User account password
+                  minLength: 14
+                  maxLength: 72
+                  examples:
+                    - "my-security-password"
+      responses:
+        201:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        422:
+          $ref: "#/components/responses/ValidationError"
+  /users/login:
+    post:
+      description: Login with the given credentials.
+      tags:
+        - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  description: User email
+                  maxLength: 320
+                  examples:
+                    - user@example.com
+                password:
+                  type: string
+                  description: User account password
+                  maxLength: 72
+                  examples:
+                    - "my-security-password"
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - access_token
+                  - token_type
+                  - expires_in
+                properties:
+                  access_token:
+                    type: string
+                    description: User's access token
+                    examples:
+                      - "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                  token_type:
+                    type: string
+                    description: The access token's type
+                    examples:
+                      - bearer
+                  expires_in:
+                    type: integer
+                    description: The access token's time to live in seconds
+                    examples:
+                      - 60
+        401:
+          description: Unauthorized
+        422:
+          $ref: "#/components/responses/ValidationError"
+  /users/self:
+    get:
+      description: Get authenticated user details.
+      tags:
+        - User
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        401:
+          description: Unauthorized
+  /transactions:
+    post:
+      description: Transfer money to another user account
+      tags:
+        - Transaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - payee_id
+                - value
+              properties:
+                payee_id:
+                  type: integer
+                  description: User's ID that will receive the transaction
+                  examples:
+                    - 456
+                value:
+                  type: integer
+                  description: Value in cents to transfer
+                  examples:
+                    - 5000
+      responses:
+        204:
+          description: No Content
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+        422:
+          $ref: "#/components/responses/ValidationError"
+components:
+  responses:
+    ValidationError:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Validation error
+            required:
+              - message
+              - errors
+            properties:
+              message:
+                type: string
+                description: Message describing the error
+                examples:
+                  - "The given data was invalid."
+              errors:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+                    description: Validation error description
+                    examples:
+                      - The given value is invalid
+                examples:
+                  - value:
+                      - The given value is invalid
+  schemas:
+    User:
+      type: object
+      description: User data
+      required:
+        - id
+        - name
+        - email
+        - identification_number
+        - is_shopkeeper
+      properties:
+        id:
+          type: integer
+          description: User's ID.
+          examples:
+            - 123
+        name:
+          type: string
+          description: User full name
+          minimum: 5
+          maximum: 255
+          examples:
+            - John Smith
+        email:
+          type: string
+          description: User email
+          examples:
+            - user@example.com
+        identification_number:
+          type: string
+          description: User's CPF if `is_shopkeeper` is `false`, otherwise user's CNPJ
+          examples:
+            - "39008244012"
+        is_shopkeeper:
+          type: boolean
+          description: If `true` the user is a shopkeeper, otherwise it's a common user
+          examples:
+            - false
+        balance:
+          type: integer
+          description: User's balance in cents
+          examples:
+            - 25000

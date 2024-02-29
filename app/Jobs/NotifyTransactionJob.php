@@ -15,6 +15,16 @@ class NotifyTransactionJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * The number of seconds to wait before retrying the job.
+     */
+    public int $backoff = 60;
+
+    /**
+     * The number of retries to run the job.
+     */
+    public int $tries = 10;
+
     protected User $payee;
     protected int $value;
 
@@ -38,6 +48,8 @@ class NotifyTransactionJob implements ShouldQueue
     {
         $client = app()->make(NotificationClient::class);
 
-        $client->notifyTransaction($this->payee, $this->value);
+        if (!$client->notifyTransaction($this->payee, $this->value)) {
+            throw new \Exception("External service error: message not sent!");
+        }
     }
 }

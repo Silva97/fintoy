@@ -17,5 +17,5 @@ $ php artisan serve
 Para iniciar o *worker* da fila:
 
 ```console
-php artisan queue:work
+$ php artisan queue:work
 ```
